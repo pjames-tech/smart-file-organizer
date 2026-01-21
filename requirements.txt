@@ -1,2 +1,9 @@
 # Smart File Organizer Dependencies
-# No external dependencies required - uses Python standard library only
+
+# Testing
+pytest>=7.0.0
+
+# Note: Core functionality uses Python standard library only
+# The following are optional dependencies for future AI integration:
+# openai>=1.0.0  # For GPT-based classification
+# google-generativeai>=0.3.0  # For Gemini-based classification

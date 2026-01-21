@@ -1,88 +1,156 @@
 # Smart File Organizer
 
-A Python utility that automatically organizes files into categorized folders based on their file types.
+A Python utility that automatically organizes files into categorized folders based on their file types, with support for rule-based classification, structured logging, and extensible AI integration.
 
 ## Features
 
-- 📁 Automatically categorizes files by type (Images, Documents, Videos, Audio, etc.)
-- ⚙️ Customizable file categories and extensions
-- 🔄 Handles duplicate filenames automatically
-- 📊 Provides summary statistics after organization
+- 📁 **Smart Classification** - Rule-based (keywords) + extension-based fallback
+- ⚙️ **Customizable Categories** - Easy to add custom file categories and rules
+- 🔄 **Duplicate Handling** - Automatic renaming for duplicate filenames
+- 📊 **Statistics** - Summary report after organization
+- 🧪 **Dry-Run Mode** - Preview changes without moving files
+- 📝 **Structured Logging** - Console and file logging with configurable levels
+- 🤖 **AI-Ready** - Placeholder for future AI-powered classification
+
+## Architecture
+
+```
+smart-file-organizer/
+├── organizer.py        # Main CLI and orchestration
+├── config.py           # Configuration and file categories
+├── rules.py            # Rule-based classification engine
+├── ai_classifier.py    # AI classification stub (future)
+├── logging_config.py   # Logging configuration
+├── requirements.txt    # Dependencies
+└── tests/              # Unit tests
+    ├── test_rules.py
+    └── test_organizer.py
+```
+
+### Classification Priority
+
+1. **AI Classification** (if enabled and available)
+2. **Keyword Rules** - Matches keywords in filenames (e.g., "invoice" → Documents)
+3. **Extension Fallback** - Uses file extension to determine category
 
 ## Installation
 
-1. Clone this repository or download the files
-2. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+```bash
+git clone https://github.com/yourusername/smart-file-organizer.git
+cd smart-file-organizer
+pip install -r requirements.txt
+```
 
 ## Usage
 
-### Basic Usage
-
-Run the organizer with default settings:
+### Interactive Mode (Default)
 
 ```bash
 python organizer.py
 ```
 
-### How it Works
+You'll be prompted for source and destination directories.
 
-1. **Run the script** - You'll see a welcome banner
-2. **Source directory prompt** - Press **Enter** to use default (Downloads), or type a custom path
-3. **Destination directory prompt** - Press **Enter** for default, or type a custom path
-4. **Automatic organization** - Files are moved into category folders (Images, Documents, Videos, etc.)
-5. **Summary** - Shows how many files were moved, skipped, or had errors
+### CLI Mode
 
-**Example session:**
+```bash
+# Basic usage with defaults
+python organizer.py --source ~/Downloads --dest ~/Downloads/Organized
 
-```
-==================================================
-Smart File Organizer
-==================================================
-Source directory [C:\Users\Victor\Downloads]:          <- Press Enter
-Destination directory [C:\Users\Victor\Downloads\Organized]:   <- Press Enter
+# Dry-run (preview without moving files)
+python organizer.py --dry-run --source ~/Downloads
 
-Organizing files...
-Moved: photo.jpg -> Images/
-Moved: report.pdf -> Documents/
+# Verbose logging
+python organizer.py --log-level DEBUG --source ~/Downloads
 
-==================================================
-Summary:
-  Files moved: 2
-  Skipped (directories): 0
-  Errors: 0
-==================================================
+# All options
+python organizer.py --source ~/Downloads --dest ~/Organized --dry-run --log-level INFO
 ```
 
-### Custom Directories
+### CLI Options
 
-You'll be prompted to enter:
+| Flag            | Short | Description                                     |
+| --------------- | ----- | ----------------------------------------------- |
+| `--source`      | `-s`  | Source directory to organize                    |
+| `--dest`        | `-d`  | Destination directory                           |
+| `--dry-run`     | `-n`  | Preview changes without moving files            |
+| `--log-level`   | `-l`  | Set logging level (DEBUG, INFO, WARNING, ERROR) |
+| `--use-ai`      |       | Enable AI classification (requires setup)       |
+| `--no-log-file` |       | Disable logging to file                         |
 
-- **Source directory**: Where your unorganized files are located (default: Downloads)
-- **Destination directory**: Where organized folders will be created
+### Examples
+
+```bash
+# Preview what would happen
+python organizer.py --dry-run --source ./messy_folder
+
+# Organize with debug logging
+python organizer.py -s ~/Downloads -d ~/Sorted -l DEBUG
+
+# Quick organize current downloads
+python organizer.py --source ~/Downloads
+```
 
 ## Configuration
 
-Edit `config.py` to customize:
+### File Categories (`config.py`)
 
-- **DEFAULT_SOURCE_DIR**: Default source directory
-- **DEFAULT_DEST_DIR**: Default destination directory
-- **FILE_CATEGORIES**: Dictionary mapping category names to file extensions
+```python
+FILE_CATEGORIES = {
+    "Images": [".jpg", ".jpeg", ".png", ".gif", ...],
+    "Documents": [".pdf", ".doc", ".docx", ".txt", ...],
+    "Videos": [".mp4", ".mkv", ".avi", ...],
+    # Add custom categories here
+}
+```
 
-### Default Categories
+### Keyword Rules (`rules.py`)
 
-| Category    | Extensions                                 |
-| ----------- | ------------------------------------------ |
-| Images      | .jpg, .jpeg, .png, .gif, .bmp, .svg, etc.  |
-| Documents   | .pdf, .doc, .docx, .txt, .xls, .xlsx, etc. |
-| Videos      | .mp4, .mkv, .avi, .mov, .wmv, etc.         |
-| Audio       | .mp3, .wav, .flac, .aac, .ogg, etc.        |
-| Archives    | .zip, .rar, .7z, .tar, .gz, etc.           |
-| Code        | .py, .js, .html, .css, .java, etc.         |
-| Executables | .exe, .msi, .bat, .sh, etc.                |
-| Fonts       | .ttf, .otf, .woff, .woff2                  |
+```python
+KEYWORD_RULES = {
+    "invoice": "Documents",    # Files with "invoice" go to Documents
+    "screenshot": "Images",    # Files with "screenshot" go to Images
+    # Add custom rules here
+}
+```
+
+## Testing
+
+```bash
+# Install pytest
+pip install pytest
+
+# Run all tests
+pytest tests/ -v
+
+# Run specific test file
+pytest tests/test_rules.py -v
+```
+
+## Roadmap
+
+### Planned Features
+
+- [ ] **AI Classification** - Integrate OpenAI/Gemini for smart categorization
+- [ ] **Watch Mode** - Automatically organize new files as they appear
+- [ ] **Undo Support** - Reverse the last organization operation
+- [ ] **Custom Rules UI** - GUI for managing classification rules
+- [ ] **Cloud Storage** - Support for S3, Google Drive, Dropbox
+
+### AI Integration (Coming Soon)
+
+The `ai_classifier.py` module provides a placeholder for AI-powered classification:
+
+```python
+# Future usage (not yet implemented)
+python organizer.py --use-ai --source ~/Downloads
+```
+
+Planned AI features:
+
+- **Content Analysis** - Classify based on file contents, not just names
+- **Learning** - Adapt to user's organization patterns
+- **Multi-modal** - Analyze images, documents, and other file types
 
 ## License
 
