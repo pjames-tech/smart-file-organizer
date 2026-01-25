@@ -83,12 +83,21 @@ class TestClassifyByExtension:
 class TestClassifyFile:
     """Tests for the main classification function."""
     
-    def test_keyword_priority(self):
-        """Keywords should take priority over extensions."""
-        # invoice.jpg should be Documents (keyword), not Images (extension)
-        assert classify_file("invoice.jpg", ".jpg") == "Documents"
-        # screenshot.pdf should be Images (keyword), not Documents (extension)
-        assert classify_file("screenshot.pdf", ".pdf") == "Images"
+    def test_extension_priority(self):
+        """Extension should take priority over keywords for known file types."""
+        # video_clip.jpg should be Images (extension), not Videos (keyword "clip")
+        assert classify_file("video_clip.jpg", ".jpg") == "Images"
+        # audio_source.mp4 should be Videos (extension), not Code (keyword "source")
+        assert classify_file("audio_source.mp4", ".mp4") == "Videos"
+        # coverage_test.png should be Images (extension), not Images (keyword "cover")
+        assert classify_file("coverage_test.png", ".png") == "Images"
+    
+    def test_keywords_for_ambiguous_files(self):
+        """Keywords should refine classification for text/unknown files."""
+        # invoice.txt should be Documents (keyword refines text file)
+        assert classify_file("invoice.txt", ".txt") == "Documents"
+        # Unknown extension with keyword should use keyword
+        assert classify_file("system_backup.xyz", ".xyz") == "Archives"
     
     def test_fallback_to_extension(self):
         """When no keyword matches, use extension."""

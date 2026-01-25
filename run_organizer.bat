@@ -10,8 +10,8 @@ echo ============================================
 echo Started at: %date% %time%
 echo.
 
-REM Run the organizer with default Downloads folder
-"C:\Python314\python.exe" organizer.py --source "%USERPROFILE%\Downloads" --dest "%USERPROFILE%\Downloads\Organized" --log-level INFO
+REM Run the organizer with default Downloads folder (organizes in place)
+"C:\Python314\python.exe" organizer.py --source "%USERPROFILE%\Downloads" --dest "%USERPROFILE%\Downloads" --log-level INFO
 
 echo.
 echo Finished at: %date% %time%

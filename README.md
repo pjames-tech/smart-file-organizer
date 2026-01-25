@@ -19,8 +19,10 @@ smart-file-organizer/
 ├── organizer.py        # Main CLI and orchestration
 ├── config.py           # Configuration and file categories
 ├── rules.py            # Rule-based classification engine
-├── ai_classifier.py    # AI classification stub (future)
+├── ai_classifier.py    # AI classification (Ollama)
+├── history.py          # Undo/redo history management
 ├── logging_config.py   # Logging configuration
+├── run_organizer.bat   # Windows Task Scheduler script
 ├── requirements.txt    # Dependencies
 └── tests/              # Unit tests
     ├── test_rules.py
@@ -29,9 +31,11 @@ smart-file-organizer/
 
 ### Classification Priority
 
-1. **AI Classification** (if enabled and available)
-2. **Keyword Rules** - Matches keywords in filenames (e.g., "invoice" → Documents)
-3. **Extension Fallback** - Uses file extension to determine category
+1. **File Extension** - Primary classification based on file type (e.g., `.jpg` → Images)
+2. **Keyword Rules** - Applied only for ambiguous cases:
+   - Text files (`.txt`, `.log`, `.md`, `.csv`, `.dat`)
+   - Unknown extensions
+3. **AI Classification** (if enabled and available)
 
 ## Installation
 
@@ -133,6 +137,40 @@ pytest tests/ -v
 # Run specific test file
 pytest tests/test_rules.py -v
 ```
+
+## Automatic Scheduling (Windows Task Scheduler)
+
+Run the organizer automatically on a schedule using the included batch script.
+
+### Quick Setup
+
+1. **Edit `run_organizer.bat`** to customize your source/destination folders:
+
+   ```batch
+   "C:\Python314\python.exe" organizer.py --source "%USERPROFILE%\Downloads" --dest "%USERPROFILE%\Downloads" --log-level INFO
+   ```
+
+2. **Create the scheduled task** (run in PowerShell as admin):
+
+   ```powershell
+   schtasks /create /tn "Smart File Organizer" /tr "C:\path\to\run_organizer.bat" /sc daily /st 12:00 /f
+   ```
+
+### Schedule Options
+
+| Schedule Type | Command Flag          | Example           |
+| ------------- | --------------------- | ----------------- |
+| Daily         | `/sc daily /st 09:00` | Every day at 9 AM |
+| Hourly        | `/sc hourly /mo 2`    | Every 2 hours     |
+| On Login      | `/sc onlogon`         | When user logs in |
+| On Startup    | `/sc onstart`         | When PC starts    |
+
+### Manage the Task
+
+- **View task**: `schtasks /query /tn "Smart File Organizer"`
+- **Run now**: `schtasks /run /tn "Smart File Organizer"`
+- **Delete task**: `schtasks /delete /tn "Smart File Organizer" /f`
+- **GUI**: Open Task Scheduler (`Win + R` → `taskschd.msc`)
 
 ## AI Classification (Ollama)
 

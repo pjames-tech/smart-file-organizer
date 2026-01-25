@@ -189,11 +189,12 @@ def classify_by_extension(file_extension: str) -> str:
 
 def classify_file(filename: str, file_extension: str) -> str:
     """
-    Classify a file using rules first, then fall back to extension.
+    Classify a file using extension first, then keywords for ambiguous cases.
     
     This is the main classification function that should be used.
-    It first attempts keyword-based classification, and if no match
-    is found, falls back to extension-based classification.
+    It prioritizes extension-based classification to avoid false positives
+    from keyword matching. Keywords are only used when the extension is
+    unrecognized or for text-based files where context matters.
     
     Args:
         filename: The name of the file.
@@ -203,15 +204,27 @@ def classify_file(filename: str, file_extension: str) -> str:
         The determined category for the file.
     
     Example:
-        >>> classify_file("invoice.jpg", ".jpg")
-        'Documents'  # Keyword 'invoice' takes priority
-        >>> classify_file("vacation.jpg", ".jpg")
-        'Images'  # No keyword match, uses extension
+        >>> classify_file("video_clip.jpg", ".jpg")
+        'Images'  # Extension takes priority, avoids "clip" → Videos
+        >>> classify_file("invoice.txt", ".txt")
+        'Documents'  # Text file, keyword "invoice" refines category
+        >>> classify_file("random_file.xyz", ".xyz")
+        'Other'  # Unknown extension, no keyword match
     """
-    # Try keyword-based classification first
-    category = classify_by_rules(filename)
-    if category:
-        return category
+    # Check extension-based classification first
+    ext_category = classify_by_extension(file_extension)
     
-    # Fall back to extension-based classification
-    return classify_by_extension(file_extension)
+    # If extension gives a clear category (not Other), use it
+    # Exception: for text-based files, allow keywords to refine
+    ambiguous_extensions = {".txt", ".log", ".md", ".csv", ".dat"}
+    
+    if ext_category != "Other" and file_extension.lower() not in ambiguous_extensions:
+        return ext_category
+    
+    # For unknown extensions or ambiguous text files, try keyword rules
+    keyword_category = classify_by_rules(filename)
+    if keyword_category:
+        return keyword_category
+    
+    # Fall back to extension result (could be "Other")
+    return ext_category
