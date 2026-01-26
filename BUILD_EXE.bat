@@ -39,6 +39,8 @@ echo.
 pyinstaller --noconsole --onefile --name "Smart File Organizer" ^
     --add-data "custom_rules.json;." ^
     --collect-all rules_ui ^
+    --icon "app_icon.ico" ^
+    --version-file "file_version_info.txt" ^
     gui.py
 
 if errorlevel 1 (
