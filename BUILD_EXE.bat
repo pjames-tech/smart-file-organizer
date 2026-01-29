@@ -20,28 +20,18 @@ if errorlevel 1 (
 )
 
 echo.
-echo [1/2] Cleaning previous builds...
-rmdir /s /q build dist 2>nul
-del /f /q *.spec 2>nul
+echo [1/2] Cleaning previous builds and caches...
+rmdir /s /q build dist __pycache__ 2>nul
+for /d /r . %%d in (__pycache__) do @if exist "%%d" rd /s /q "%%d"
+:: Note: We do NOT delete the .spec file anymore as we want to use our customized one.
 
 echo.
 echo [2/2] Building 'Smart File Organizer.exe'...
 echo       This may take a minute...
 echo.
 
-:: Build the EXE
-:: --noconsole: Don't show terminal window
-:: --onefile: Bundle everything into a single .exe
-:: --name: Name of the output file
-:: --add-data: Include necessary data files (custom_rules.json)
-:: --icon: (Optional) We'll skip for now as we don't have an .ico file yet
-
-pyinstaller --noconsole --onefile --name "Smart File Organizer" ^
-    --add-data "custom_rules.json;." ^
-    --collect-all rules_ui ^
-    --icon "app_icon.ico" ^
-    --version-file "file_version_info.txt" ^
-    gui.py
+:: Build the EXE using the existing Spec file via python module
+python -m PyInstaller --clean "Smart File Organizer.spec"
 
 if errorlevel 1 (
     echo.

@@ -1,105 +1,6 @@
 {
   "sessions": [
     {
-      "timestamp": "2026-01-22T10:35:16.346653",
-      "source_dir": "C:\\Users\\Victor\\Downloads",
-      "dest_dir": "C:\\Users\\Victor\\Downloads\\Organized",
-      "dry_run": false,
-      "movements": [
-        {
-          "from": "C:\\Users\\Victor\\Downloads\\38cc84e9-d83f-44c5-bae2-a56930d81b78.png",
-          "to": "C:\\Users\\Victor\\Downloads\\Organized\\Images\\38cc84e9-d83f-44c5-bae2-a56930d81b78.png"
-        },
-        {
-          "from": "C:\\Users\\Victor\\Downloads\\ChatGPT Image Jan 21, 2026, 11_20_37 PM.png",
-          "to": "C:\\Users\\Victor\\Downloads\\Organized\\Images\\ChatGPT Image Jan 21, 2026, 11_20_37 PM.png"
-        },
-        {
-          "from": "C:\\Users\\Victor\\Downloads\\Gemini_Generated_Image_2rbnf62rbnf62rbn.png",
-          "to": "C:\\Users\\Victor\\Downloads\\Organized\\Images\\Gemini_Generated_Image_2rbnf62rbnf62rbn.png"
-        },
-        {
-          "from": "C:\\Users\\Victor\\Downloads\\Gemini_Generated_Image_lsygynlsygynlsyg.png",
-          "to": "C:\\Users\\Victor\\Downloads\\Organized\\Images\\Gemini_Generated_Image_lsygynlsygynlsyg.png"
-        },
-        {
-          "from": "C:\\Users\\Victor\\Downloads\\Gemini_Generated_Image_lsygynlsygynlsyg01.png",
-          "to": "C:\\Users\\Victor\\Downloads\\Organized\\Images\\Gemini_Generated_Image_lsygynlsygynlsyg01.png"
-        },
-        {
-          "from": "C:\\Users\\Victor\\Downloads\\Unobits Logo.png",
-          "to": "C:\\Users\\Victor\\Downloads\\Organized\\Images\\Unobits Logo.png"
-        }
-      ],
-      "completed": true
-    },
-    {
-      "timestamp": "2026-01-22T11:30:22.909583",
-      "source_dir": "C:\\Users\\Victor\\Downloads",
-      "dest_dir": "C:\\Users\\Victor\\Downloads\\Organized",
-      "dry_run": false,
-      "movements": [
-        {
-          "from": "C:\\Users\\Victor\\Downloads\\38cc84e9-d83f-44c5-bae2-a56930d81b78.png",
-          "to": "C:\\Users\\Victor\\Downloads\\Organized\\Images\\38cc84e9-d83f-44c5-bae2-a56930d81b78.png"
-        },
-        {
-          "from": "C:\\Users\\Victor\\Downloads\\ChatGPT Image Jan 21, 2026, 11_20_37 PM.png",
-          "to": "C:\\Users\\Victor\\Downloads\\Organized\\Images\\ChatGPT Image Jan 21, 2026, 11_20_37 PM.png"
-        },
-        {
-          "from": "C:\\Users\\Victor\\Downloads\\Gemini_Generated_Image_2rbnf62rbnf62rbn.png",
-          "to": "C:\\Users\\Victor\\Downloads\\Organized\\Images\\Gemini_Generated_Image_2rbnf62rbnf62rbn.png"
-        },
-        {
-          "from": "C:\\Users\\Victor\\Downloads\\Gemini_Generated_Image_lsygynlsygynlsyg.png",
-          "to": "C:\\Users\\Victor\\Downloads\\Organized\\Images\\Gemini_Generated_Image_lsygynlsygynlsyg.png"
-        },
-        {
-          "from": "C:\\Users\\Victor\\Downloads\\Gemini_Generated_Image_lsygynlsygynlsyg01.png",
-          "to": "C:\\Users\\Victor\\Downloads\\Organized\\Images\\Gemini_Generated_Image_lsygynlsygynlsyg01.png"
-        },
-        {
-          "from": "C:\\Users\\Victor\\Downloads\\Unobits Logo.png",
-          "to": "C:\\Users\\Victor\\Downloads\\Organized\\Images\\Unobits Logo.png"
-        }
-      ],
-      "completed": true
-    },
-    {
-      "timestamp": "2026-01-22T11:34:40.650257",
-      "source_dir": "C:\\Users\\Victor\\Downloads",
-      "dest_dir": "C:\\Users\\Victor\\Downloads",
-      "dry_run": false,
-      "movements": [
-        {
-          "from": "C:\\Users\\Victor\\Downloads\\38cc84e9-d83f-44c5-bae2-a56930d81b78.png",
-          "to": "C:\\Users\\Victor\\Downloads\\Images\\38cc84e9-d83f-44c5-bae2-a56930d81b78.png"
-        },
-        {
-          "from": "C:\\Users\\Victor\\Downloads\\ChatGPT Image Jan 21, 2026, 11_20_37 PM.png",
-          "to": "C:\\Users\\Victor\\Downloads\\Images\\ChatGPT Image Jan 21, 2026, 11_20_37 PM.png"
-        },
-        {
-          "from": "C:\\Users\\Victor\\Downloads\\Gemini_Generated_Image_2rbnf62rbnf62rbn.png",
-          "to": "C:\\Users\\Victor\\Downloads\\Images\\Gemini_Generated_Image_2rbnf62rbnf62rbn.png"
-        },
-        {
-          "from": "C:\\Users\\Victor\\Downloads\\Gemini_Generated_Image_lsygynlsygynlsyg.png",
-          "to": "C:\\Users\\Victor\\Downloads\\Images\\Gemini_Generated_Image_lsygynlsygynlsyg.png"
-        },
-        {
-          "from": "C:\\Users\\Victor\\Downloads\\Gemini_Generated_Image_lsygynlsygynlsyg01.png",
-          "to": "C:\\Users\\Victor\\Downloads\\Images\\Gemini_Generated_Image_lsygynlsygynlsyg01.png"
-        },
-        {
-          "from": "C:\\Users\\Victor\\Downloads\\Unobits Logo.png",
-          "to": "C:\\Users\\Victor\\Downloads\\Images\\Unobits Logo.png"
-        }
-      ],
-      "completed": true
-    },
-    {
       "timestamp": "2026-01-22T12:00:03.364794",
       "source_dir": "C:\\Users\\Victor\\Downloads",
       "dest_dir": "C:\\Users\\Victor\\Downloads",
@@ -1272,6 +1173,53 @@
         {
           "from": "C:\\Users\\Victor\\Downloads\\Women leader.jpeg",
           "to": "C:\\Users\\Victor\\Downloads\\Images\\Women leader.jpeg"
+        }
+      ],
+      "completed": true
+    },
+    {
+      "timestamp": "2026-01-27T12:30:06.750981",
+      "source_dir": "C:\\Users\\Victor\\Downloads",
+      "dest_dir": "C:\\Users\\Victor\\Downloads",
+      "dry_run": false,
+      "movements": [
+        {
+          "from": "C:\\Users\\Victor\\Downloads\\BPBCG 2 years v2.jpg",
+          "to": "C:\\Users\\Victor\\Downloads\\Images\\BPBCG 2 years v2_1.jpg"
+        },
+        {
+          "from": "C:\\Users\\Victor\\Downloads\\BPBCG 2 years.jpg",
+          "to": "C:\\Users\\Victor\\Downloads\\Images\\BPBCG 2 years_1.jpg"
+        }
+      ],
+      "completed": true
+    },
+    {
+      "timestamp": "2026-01-27T23:08:26.192150",
+      "source_dir": "C:\\Users\\Victor\\AppData\\Local\\Temp\\pytest-of-Victor\\pytest-4\\test_organize_documents_smart0\\src",
+      "dest_dir": "C:\\Users\\Victor\\AppData\\Local\\Temp\\pytest-of-Victor\\pytest-4\\test_organize_documents_smart0\\dest",
+      "dry_run": false,
+      "movements": [
+        {
+          "from": "C:\\Users\\Victor\\AppData\\Local\\Temp\\pytest-of-Victor\\pytest-4\\test_organize_documents_smart0\\src\\notes.txt",
+          "to": "C:\\Users\\Victor\\AppData\\Local\\Temp\\pytest-of-Victor\\pytest-4\\test_organize_documents_smart0\\dest\\Text Files\\notes.txt"
+        },
+        {
+          "from": "C:\\Users\\Victor\\AppData\\Local\\Temp\\pytest-of-Victor\\pytest-4\\test_organize_documents_smart0\\src\\report.pdf",
+          "to": "C:\\Users\\Victor\\AppData\\Local\\Temp\\pytest-of-Victor\\pytest-4\\test_organize_documents_smart0\\dest\\PDFs\\report.pdf"
+        }
+      ],
+      "completed": true
+    },
+    {
+      "timestamp": "2026-01-27T23:08:26.215464",
+      "source_dir": "C:\\Users\\Victor\\AppData\\Local\\Temp\\pytest-of-Victor\\pytest-4\\test_organize_images_smart0\\src",
+      "dest_dir": "C:\\Users\\Victor\\AppData\\Local\\Temp\\pytest-of-Victor\\pytest-4\\test_organize_images_smart0\\dest",
+      "dry_run": false,
+      "movements": [
+        {
+          "from": "C:\\Users\\Victor\\AppData\\Local\\Temp\\pytest-of-Victor\\pytest-4\\test_organize_images_smart0\\src\\photo.jpg",
+          "to": "C:\\Users\\Victor\\AppData\\Local\\Temp\\pytest-of-Victor\\pytest-4\\test_organize_images_smart0\\dest\\2023\\photo.jpg"
         }
       ],
       "completed": true

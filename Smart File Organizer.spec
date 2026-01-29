@@ -1,16 +1,22 @@
 # -*- mode: python ; coding: utf-8 -*-
 from PyInstaller.utils.hooks import collect_all
 
-datas = [('custom_rules.json', '.')]
+import sys
+import os
+
+# Get the absolute path to the project directory (current directory)
+project_dir = os.path.abspath(".")
+
+datas = [('custom_rules.json', '.'), ('app_icon.ico', '.'), ('app_icon.png', '.')]
 binaries = []
-hiddenimports = []
-tmp_ret = collect_all('rules_ui')
-datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
+hiddenimports = ['app_config', 'organizer', 'history', 'rules', 'scheduler', 'watchdog']
+# rules_ui is a single file, not a package, so we don't need collect_all
+
 
 
 a = Analysis(
-    ['gui.py'],
-    pathex=[],
+    ['gui.py', 'app_config.py', 'organizer.py', 'history.py', 'rules.py', 'scheduler.py'],
+    pathex=[project_dir],
     binaries=binaries,
     datas=datas,
     hiddenimports=hiddenimports,

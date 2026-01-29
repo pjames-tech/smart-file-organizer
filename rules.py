@@ -8,10 +8,10 @@ Supports both built-in rules and user-defined custom rules from the UI.
 import json
 from pathlib import Path
 from typing import Optional
-from config import FILE_CATEGORIES
+from app_config import FILE_CATEGORIES, DATA_DIR
 
 # Path to custom rules file (managed by rules_ui.py)
-CUSTOM_RULES_FILE = Path(__file__).parent / "custom_rules.json"
+CUSTOM_RULES_FILE = DATA_DIR / "custom_rules.json"
 
 
 def load_custom_rules() -> dict:
@@ -216,7 +216,7 @@ def classify_file(filename: str, file_extension: str) -> str:
     
     # If extension gives a clear category (not Other), use it
     # Exception: for text-based files, allow keywords to refine
-    ambiguous_extensions = {".txt", ".log", ".md", ".csv", ".dat"}
+    ambiguous_extensions = {".log", ".md", ".csv", ".dat"}
     
     if ext_category != "Other" and file_extension.lower() not in ambiguous_extensions:
         return ext_category

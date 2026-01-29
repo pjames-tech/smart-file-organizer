@@ -16,11 +16,19 @@ import shutil
 import argparse
 from pathlib import Path
 from typing import Optional
+import time
+from datetime import datetime
 
-from config import FILE_CATEGORIES, DEFAULT_SOURCE_DIR, DEFAULT_DEST_DIR
+try:
+    from watchdog.observers import Observer
+    from watchdog.events import FileSystemEventHandler
+    WATCHDOG_AVAILABLE = True
+except ImportError:
+    WATCHDOG_AVAILABLE = False
+
+from app_config import FILE_CATEGORIES, DEFAULT_SOURCE_DIR, DEFAULT_DEST_DIR, DETAILED_CATEGORIES
 from logging_config import setup_logging, get_logger
 from rules import classify_file, classify_by_rules
-from ai_classifier import classify_with_ai, is_ai_available
 from history import start_session, record_movement, save_session, undo_last_session, get_history_summary
 
 
@@ -45,11 +53,62 @@ def get_category(file_extension: str) -> str:
     return "Other"
 
 
+def detect_folder_context(source_path: Path) -> str:
+    """
+    Analyze folder content to determine its primary context.
+    Returns: 'Images', 'Documents', or 'Mixed'
+    """
+    counts = {"Images": 0, "Documents": 0, "Total": 0}
+    
+    for item in source_path.iterdir():
+        if item.is_file():
+            counts["Total"] += 1
+            ext = item.suffix.lower()
+            if ext in FILE_CATEGORIES["Images"]:
+                counts["Images"] += 1
+            elif ext in FILE_CATEGORIES["Documents"]:
+                counts["Documents"] += 1
+    
+    if counts["Total"] == 0:
+        return "Mixed"
+        
+    img_ratio = counts["Images"] / counts["Total"]
+    doc_ratio = counts["Documents"] / counts["Total"]
+    
+    if img_ratio > 0.6:
+        return "Images"
+    elif doc_ratio > 0.6:
+        return "Documents"
+    return "Mixed"
+
+def get_detailed_category(file_path: Path, context: str) -> str:
+    """Get specialized category based on context."""
+    if context == "Documents":
+        # Check detailed mapping first
+        ext = file_path.suffix.lower()
+        if ext in DETAILED_CATEGORIES:
+            return DETAILED_CATEGORIES[ext]
+            
+    elif context == "Images":
+        # Only sort actual images by year
+        ext = file_path.suffix.lower()
+        if ext in FILE_CATEGORIES["Images"]:
+            # Sort by Year (creation date)
+            try:
+                mtime = os.path.getmtime(file_path)
+                dt = datetime.fromtimestamp(mtime)
+                return str(dt.year)
+            except Exception:
+                pass
+            
+    return None
+
 def organize_files(
     source_dir: Optional[str] = None,
     dest_dir: Optional[str] = None,
     dry_run: bool = False,
-    use_ai: bool = False
+    use_ai: bool = False,
+    smart_context: bool = False
 ) -> dict:
     """
     Organize files from source directory into categorized folders.
@@ -59,6 +118,7 @@ def organize_files(
         dest_dir: Directory where organized folders will be created.
         dry_run: If True, only log actions without moving files.
         use_ai: If True, attempt AI classification (requires API setup).
+        smart_context: If True, adapt organization strategy based on folder content.
     
     Returns:
         Dictionary with statistics about organized files:
@@ -91,6 +151,12 @@ def organize_files(
     
     stats = {"moved": 0, "skipped": 0, "errors": 0}
     
+    # Context detection
+    context = "Mixed"
+    if smart_context:
+        context = detect_folder_context(source)
+        logger.info(f"Smart Context detected: {context}")
+    
     # Start a session for undo support
     session = start_session(str(source), str(destination), dry_run)
     
@@ -103,20 +169,21 @@ def organize_files(
                 # Determine category using the classification chain
                 category = None
                 
-                # 1. Try AI classification if enabled
-                if use_ai and is_ai_available():
-                    category = classify_with_ai(file_path.name, file_path.suffix, str(file_path))
+                # 0. Smart Context Strategy
+                if smart_context and context != "Mixed":
+                    category = get_detailed_category(file_path, context)
                     if category:
-                        logger.debug(f"AI classified {file_path.name} as {category}")
-                
-                # 2. Fall back to rule-based + extension classification
+                        logger.debug(f"Smart Context ({context}) matched {file_path.name} -> {category}")
+
+                # 1. Fall back to rule-based + extension classification
                 if not category:
                     category = classify_file(file_path.name, file_path.suffix)
-                    rule_match = classify_by_rules(file_path.name)
-                    if rule_match:
-                        logger.debug(f"Rule matched {file_path.name} -> {category}")
-                    else:
-                        logger.debug(f"Extension matched {file_path.name} -> {category}")
+                    if context == "Mixed": # Only log rule matches in mixed mode to reduce noise
+                        rule_match = classify_by_rules(file_path.name)
+                        if rule_match:
+                            logger.debug(f"Rule matched {file_path.name} -> {category}")
+                        else:
+                            logger.debug(f"Extension matched {file_path.name} -> {category}")
                 
                 category_dir = destination / category
                 
@@ -165,6 +232,135 @@ def organize_files(
     return stats
 
 
+def flatten_directory(source_dir: str) -> dict:
+    """
+    Move all files from subdirectories back to the source root and remove empty folders.
+    Records operations for Undo.
+    """
+    logger = get_logger()
+    source = Path(source_dir)
+    stats = {"moved": 0, "errors": 0, "removed_dirs": 0}
+    
+    if not source.exists() or not source.is_dir():
+        logger.error(f"Invalid source directory: {source}")
+        return stats
+
+    # Start session for Undo
+    session = start_session(str(source), str(source), dry_run=False) # flattening is in-place
+    
+    # Get all files using rglob (recursive)
+    files = [p for p in source.rglob("*") if p.is_file()]
+    
+    for file_path in files:
+        # Skip files already in the root
+        if file_path.parent == source:
+            continue
+            
+        try:
+            dest_path = source / file_path.name
+            
+            # Handle duplicates
+            if dest_path.exists():
+                base = file_path.stem
+                ext = file_path.suffix
+                counter = 1
+                while dest_path.exists():
+                    dest_path = source / f"{base}_{counter}{ext}"
+                    counter += 1
+            
+            original_path = str(file_path)
+            shutil.move(str(file_path), str(dest_path))
+            
+            # Record for undo
+            record_movement(session, original_path, str(dest_path))
+            
+            stats["moved"] += 1
+            logger.info(f"Flattened: {file_path.name}")
+            
+        except Exception as e:
+            logger.error(f"Error moving {file_path}: {e}")
+            stats["errors"] += 1
+            
+    # Now remove empty directories (bottom-up)
+    for dir_path in sorted(source.rglob("*"), key=lambda p: len(p.parts), reverse=True):
+        if dir_path.is_dir() and dir_path != source:
+            try:
+                # Only remove if empty
+                if not any(dir_path.iterdir()):
+                    dir_path.rmdir()
+                    stats["removed_dirs"] += 1
+                    logger.info(f"Removed empty dir: {dir_path}")
+            except Exception as e:
+                pass
+    
+    # Save the session
+    save_session(session)
+    return stats
+
+
+class OrganizerHandler(FileSystemEventHandler):
+    """Handles file system events by triggering organization."""
+    
+    def __init__(self, source_dir: str, dest_dir: str, use_ai: bool, smart_context: bool = False):
+        self.source_dir = source_dir
+        self.dest_dir = dest_dir
+        self.use_ai = use_ai
+        self.smart_context = smart_context
+        self.logger = get_logger()
+        # Coalescing: don't organize too frequently
+        self.last_run = 0
+        self.cooldown = 2 # seconds
+        
+    def on_created(self, event):
+        if not event.is_directory:
+            self._trigger_organize()
+            
+    def on_moved(self, event):
+        if not event.is_directory and Path(event.dest_path).parent == Path(self.source_dir):
+            self._trigger_organize()
+
+    def _trigger_organize(self):
+        current_time = time.time()
+        if current_time - self.last_run > self.cooldown:
+            self.last_run = current_time
+            # Wait a tiny bit for the file to be fully written/unlocked
+            time.sleep(0.5)
+            try:
+                self.logger.info("Watch Mode: Change detected, organizing...")
+                organize_files(self.source_dir, self.dest_dir, use_ai=self.use_ai, smart_context=self.smart_context)
+            except Exception as e:
+                self.logger.error(f"Watch Mode Error: {e}")
+
+
+def start_watch_mode(source_dir: str, dest_dir: str, use_ai: bool):
+    """Start monitoring a directory for changes."""
+    logger = get_logger()
+    if not WATCHDOG_AVAILABLE:
+        logger.error("watchdog library not installed. Install with: pip install watchdog")
+        return False
+        
+    source = Path(source_dir)
+    dest = Path(dest_dir) or source
+    
+    event_handler = OrganizerHandler(str(source), str(dest), use_ai)
+    observer = Observer()
+    observer.schedule(event_handler, str(source), recursive=False)
+    
+    logger.info(f"WATCH MODE ACTIVE: Monitoring {source}")
+    logger.info("Press Ctrl+C to stop.")
+    
+    observer.start()
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        observer.stop()
+        logger.info("Watch Mode stopped.")
+    
+    observer.join()
+    return True
+
+
 def parse_args() -> argparse.Namespace:
     """
     Parse command-line arguments.
@@ -210,11 +406,7 @@ Examples:
         help="Organize files within the source folder (creates subfolders in source)"
     )
     
-    parser.add_argument(
-        "--use-ai",
-        action="store_true",
-        help="Enable AI-powered classification (requires API setup)"
-    )
+
     
     parser.add_argument(
         "--log-level", "-l",
@@ -231,12 +423,6 @@ Examples:
     )
     
     parser.add_argument(
-        "--ai-stats",
-        action="store_true",
-        help="Show AI learning statistics and exit"
-    )
-    
-    parser.add_argument(
         "--undo",
         action="store_true",
         help="Undo the last organization operation"
@@ -246,6 +432,12 @@ Examples:
         "--history",
         action="store_true",
         help="Show organization history and exit"
+    )
+    
+    parser.add_argument(
+        "--watch", "-w",
+        action="store_true",
+        help="Run in Watch Mode: monitor source folder and organize new files in real-time"
     )
     
     return parser.parse_args()
@@ -269,16 +461,8 @@ def main() -> int:
     print("Smart File Organizer")
     print("=" * 50)
     
-    # Handle --ai-stats flag
-    if args.ai_stats:
-        from ai_classifier import get_learning_stats
-        stats = get_learning_stats()
-        print("\nAI Learning Statistics:")
-        print(f"  Total classifications: {stats['total_classifications']}")
-        print(f"  Unique patterns learned: {stats['unique_patterns']}")
-        print(f"  User corrections: {stats['corrections']}")
-        print("=" * 50)
-        return 0
+    print("Smart File Organizer")
+    print("=" * 50)
     
     # Handle --undo flag
     if args.undo:
@@ -321,6 +505,12 @@ def main() -> int:
         print(f"[IN-PLACE MODE] Organizing within: {source}")
     
     if source is None and dest is None and not args.dry_run and not args.in_place:
+        # Check if running in a non-interactive environment
+        if sys.stdin is None:
+            print("Error: Running in non-interactive mode without arguments.")
+            print("Please provide --source and --dest arguments.")
+            return 1
+
         # Interactive mode - maintain backward compatibility
         source = input(f"Source directory [{DEFAULT_SOURCE_DIR}]: ").strip() or None
         dest = input(f"Destination directory [{DEFAULT_DEST_DIR}]: ").strip() or None
@@ -328,13 +518,19 @@ def main() -> int:
     if args.dry_run:
         print("\n[DRY RUN MODE] No files will be moved.\n")
     
-    if args.use_ai:
-        if is_ai_available():
-            print("AI classification: ENABLED")
-        else:
-            logger.warning("AI classification requested but not available. Using rules only.")
-            print("AI classification: NOT AVAILABLE (using rules only)")
-    
+    if args.watch:
+        if not WATCHDOG_AVAILABLE:
+            print("\n❌ Error: 'watchdog' library is required for Watch Mode.")
+            print("Install it with: pip install watchdog")
+            return 1
+        
+        try:
+            start_watch_mode(source, dest or source, False)
+            return 0
+        except Exception as e:
+            print(f"\n❌ Error starting Watch Mode: {e}")
+            return 1
+
     print("\nOrganizing files...")
     
     try:
@@ -342,7 +538,7 @@ def main() -> int:
             source_dir=source,
             dest_dir=dest,
             dry_run=args.dry_run,
-            use_ai=args.use_ai
+            use_ai=False
         )
         
         print("\n" + "=" * 50)

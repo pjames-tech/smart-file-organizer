@@ -8,12 +8,14 @@ import json
 import logging
 from pathlib import Path
 from datetime import datetime
+from datetime import datetime
 from typing import Optional
+from app_config import DATA_DIR
 
 logger = logging.getLogger("smart_file_organizer")
 
 # History file location
-HISTORY_FILE = Path(__file__).parent / "organizer_history.json"
+HISTORY_FILE = DATA_DIR / "organizer_history.json"
 MAX_HISTORY_SESSIONS = 10  # Keep last 10 sessions
 
 

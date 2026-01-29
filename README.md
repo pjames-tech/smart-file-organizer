@@ -1,18 +1,22 @@
 # Smart File Organizer
 
-A Python utility that automatically organizes files into categorized folders based on their file types, with support for rule-based classification, structured logging, and extensible AI integration.
+A Python utility that automatically organizes files into categorized folders based on their file types, with support for rule-based classification, structured logging, and real-time monitoring.
 
 ## Features
 
-- 📁 **Smart Classification** - Rule-based (keywords) + extension-based fallback
+- 📁 **Smart Classification**
+  - **Rule-based classification** (keywords take priority)
+  - **Extension-based fallback** classification (supports PHP, TS, JSX, etc.)
 - ⚙️ **Customizable Categories** - Easy to add custom file categories and rules
 - 🔄 **Duplicate Handling** - Automatic renaming for duplicate filenames
 - 📊 **Statistics** - Summary report after organization
 - 🧪 **Dry-Run Mode** - Preview changes without moving files
 - 📝 **Structured Logging** - Console and file logging with configurable levels
-- 🤖 **AI Classification** - Local AI with Ollama for intelligent sorting
-- 🖥️ **Desktop GUI** - User-friendly graphical interface for non-techies
-- 🌐 **Web Dashboard** - Full-featured web interface with stats and history
+- 🖥️ **Modern Desktop UI** - Sleek dark-themed interface with:
+  - **Scheduling**: Automate organization to run daily.
+  - **Flatten Directory**: Undo organization by moving files back to the root.
+  - **Watch Mode**: Real-time folder monitoring.
+- ↩️ **Undo Support** - Easily revert any organization session
 
 ## Architecture
 
@@ -20,27 +24,20 @@ A Python utility that automatically organizes files into categorized folders bas
 smart-file-organizer/
 ├── organizer.py        # Main CLI and orchestration
 ├── gui.py              # Desktop GUI application (tkinter)
-├── dashboard.py        # Web-based dashboard
-├── config.py           # Configuration and file categories
+├── app_config.py       # Configuration and file categories
 ├── rules.py            # Rule-based classification engine
-├── ai_classifier.py    # AI classification (Ollama)
+├── scheduler.py        # Windows Task Scheduler integration
 ├── history.py          # Undo/redo history management
 ├── logging_config.py   # Logging configuration
-├── rules_ui.py         # Simple rules manager UI
-├── run_organizer.bat   # Windows Task Scheduler script
+├── run_organizer.bat   # Batch script helper
 ├── requirements.txt    # Dependencies
 └── tests/              # Unit tests
-    ├── test_rules.py
-    └── test_organizer.py
 ```
 
 ### Classification Priority
 
-1. **File Extension** - Primary classification based on file type (e.g., `.jpg` → Images)
-2. **Keyword Rules** - Applied only for ambiguous cases:
-   - Text files (`.txt`, `.log`, `.md`, `.csv`, `.dat`)
-   - Unknown extensions
-3. **AI Classification** (if enabled and available)
+1. **Keyword Rules** - Custom rules take priority.
+2. **File Extension** - Standard classification based on file type.
 
 ## Installation
 
@@ -60,15 +57,14 @@ pip install -r requirements.txt
 2. Download the latest `Smart-File-Organizer.zip`.
 3. Extract and double-click `Smart File Organizer.exe`.
 
-**For developers:**
+## 👁️ Watch Mode
 
-```bash
-python organizer.py --source ~/Downloads
-```
+Watch Mode monitors your source folder in real-time. Any file you drop into the folder will be automatically categorized and moved instantly.
 
-This organizes files **in-place** - category folders (Images, Documents, etc.) are created directly inside your Downloads folder.
+- **GUI**: Just toggle the **"Watch Mode"** switch.
+- **CLI**: Run `python organizer.py --watch`
 
-### Desktop GUI (Recommended for Non-Techies)
+### Desktop GUI
 
 Launch the graphical interface:
 
@@ -81,27 +77,11 @@ python gui.py
 - 📂 Browse and select any folder to organize
 - 🚀 **Organize Now** - One-click file organization
 - 👁️ **Preview Changes** - See what will happen before committing
+- 🧹 **Flatten** - Move files out of subfolders back to the root
+- ⏰ **Automation** - Schedule daily organization tasks
 - ↩️ **Undo Last** - Restore files to their original locations
 - 📋 Activity log with colored output
-- 🤖 Optional AI classification toggle
-
-### Web Dashboard
-
-Launch the full-featured web interface:
-
-```bash
-python dashboard.py
-```
-
-Then open <http://localhost:8080> in your browser.
-
-**Dashboard Tabs:**
-
-- **📊 Dashboard** - Overview stats and quick action buttons
-- **🚀 Organize** - Select folder, preview, and organize files
-- **📋 Rules** - Manage custom keyword classification rules
-- **📜 History** - View past sessions and undo any of them
-- **⚙️ Settings** - Configure defaults and AI options
+- ⌚ **Watch Mode** - Real-time folder monitoring
 
 ### CLI Mode
 
@@ -111,9 +91,6 @@ python organizer.py --source ~/Downloads
 
 # Dry-run (preview without moving files)
 python organizer.py --dry-run --source ~/Downloads
-
-# With AI classification
-python organizer.py --use-ai --source ~/Downloads
 
 # Undo last organization
 python organizer.py --undo
@@ -130,10 +107,9 @@ python organizer.py --history
 | `--dest`        | `-d`  | Destination directory (default: same as source) |
 | `--dry-run`     | `-n`  | Preview changes without moving files            |
 | `--in-place`    | `-i`  | Organize within source folder (default)         |
-| `--use-ai`      |       | Enable AI classification (requires Ollama)      |
+| `--watch`       | `-w`  | Monitor folder and organize in real-time        |
 | `--undo`        |       | Undo the last organization                      |
 | `--history`     |       | Show organization history                       |
-| `--ai-stats`    |       | Show AI learning statistics                     |
 | `--log-level`   | `-l`  | Set logging level (DEBUG, INFO, WARNING, ERROR) |
 | `--no-log-file` |       | Disable logging to file                         |
 
@@ -143,22 +119,23 @@ python organizer.py --history
 # Preview what would happen
 python organizer.py --dry-run --source ./messy_folder
 
-# Organize with AI and debug logging
-python organizer.py --use-ai -s ~/Downloads -l DEBUG
-
 # Quick organize current downloads
 python organizer.py --source ~/Downloads
+
+# Start watching a folder
+python organizer.py --watch --source ~/Downloads
 ```
 
 ## Configuration
 
-### File Categories (`config.py`)
+### File Categories (`app_config.py`)
 
 ```python
 FILE_CATEGORIES = {
     "Images": [".jpg", ".jpeg", ".png", ".gif", ...],
     "Documents": [".pdf", ".doc", ".docx", ".txt", ...],
     "Videos": [".mp4", ".mkv", ".avi", ...],
+    "Code": [".py", ".js", ".php", ".ts", ".jsx", ...],
     # Add custom categories here
 }
 ```
@@ -181,9 +158,6 @@ pip install pytest
 
 # Run all tests
 pytest tests/ -v
-
-# Run specific test file
-pytest tests/test_rules.py -v
 ```
 
 ## Automatic Scheduling (Windows Task Scheduler)
@@ -203,85 +177,6 @@ Run the organizer automatically on a schedule using the included batch script.
    ```powershell
    schtasks /create /tn "Smart File Organizer" /tr "C:\path\to\run_organizer.bat" /sc daily /st 12:00 /f
    ```
-
-### Schedule Options
-
-| Schedule Type | Command Flag          | Example           |
-| ------------- | --------------------- | ----------------- |
-| Daily         | `/sc daily /st 09:00` | Every day at 9 AM |
-| Hourly        | `/sc hourly /mo 2`    | Every 2 hours     |
-| On Login      | `/sc onlogon`         | When user logs in |
-| On Startup    | `/sc onstart`         | When PC starts    |
-
-### Manage the Task
-
-- **View task**: `schtasks /query /tn "Smart File Organizer"`
-- **Run now**: `schtasks /run /tn "Smart File Organizer"`
-- **Delete task**: `schtasks /delete /tn "Smart File Organizer" /f`
-- **GUI**: Open Task Scheduler (`Win + R` → `taskschd.msc`)
-
-## AI Classification (Ollama)
-
-The organizer supports **local AI classification** using [Ollama](https://ollama.ai/) - free, private, no API key needed.
-
-### AI Features
-
-- **Content Analysis** - Reads text files to classify based on contents
-- **Learning System** - Remembers patterns from your classifications
-- **Multi-modal Vision** - Analyzes images using llava model
-- **Smart Fallback** - Uses filename when content isn't available
-
-### Setup
-
-1. **Install Ollama**: Download from [ollama.ai/download](https://ollama.ai/download)
-
-2. **Pull models**:
-
-   ```bash
-   ollama pull llama3.2      # Required: text classification
-   ollama pull llava         # Optional: image analysis
-   ```
-
-3. **Install Python dependency**:
-
-   ```bash
-   pip install requests
-   ```
-
-4. **Run with AI**:
-
-   ```bash
-   python organizer.py --use-ai --source ~/Downloads --dry-run
-   ```
-
-5. **Check learning stats**:
-
-   ```bash
-   python organizer.py --ai-stats
-   ```
-
-### How AI Classification Works
-
-1. **Learned Patterns** - Checks if filename matches previously learned patterns
-2. **Vision Analysis** - For images, uses llava to "see" what the image contains
-3. **Content Analysis** - For text files, reads contents to understand the file
-4. **Filename AI** - Falls back to classifying by filename with LLM
-
-## Roadmap
-
-### Completed Features
-
-- [x] **AI Classification** - Local AI with Ollama ✅
-- [x] **Content Analysis** - Classify based on file contents ✅
-- [x] **Learning System** - Adapts to your patterns ✅
-- [x] **Multi-modal Vision** - Analyze images with llava ✅
-- [x] **Undo Support** - Reverse organization with `--undo` ✅
-- [x] **Custom Rules UI** - Web GUI for managing rules ✅
-
-### Planned Features
-
-- [ ] **Watch Mode** - Automatically organize new files as they appear
-- [ ] **Cloud Storage** - Support for S3, Google Drive, Dropbox
 
 ## License
 
