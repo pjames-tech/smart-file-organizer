@@ -19,6 +19,53 @@ A Python utility that automatically organizes files into categorized folders bas
 - ↩️ **Undo Support** - Easily revert any organization session (auto-cleans empty folders)
 - 🧠 **Smart Context** - Auto-detects folder purpose by name (Photos, Documents, etc.) for specialized sorting
 
+## Platform Compatibility
+
+| Platform    | Pre-built Executable             | Run from Source |
+| ----------- | -------------------------------- | --------------- |
+| **Windows** | ✅ `.exe` available              | ✅ Supported    |
+| **macOS**   | ✅ Available via GitHub Releases | ✅ Supported    |
+| **Linux**   | ✅ Available via GitHub Releases | ✅ Supported    |
+
+> **Note:** Pre-built executables for all platforms are automatically generated via GitHub Actions and attached to each [Release](https://github.com/pjames-tech/smart-file-organizer/releases).
+
+### macOS / Linux Setup
+
+1. **Install Python 3.8+** (usually pre-installed on Linux, download from [python.org](https://python.org) for macOS)
+
+2. **Clone and install dependencies:**
+
+   ```bash
+   git clone https://github.com/pjames-tech/smart-file-organizer.git
+   cd smart-file-organizer
+   pip install -r requirements.txt
+   ```
+
+3. **Run the GUI:**
+
+   ```bash
+   python gui.py
+   ```
+
+4. **Or run the CLI:**
+   ```bash
+   python organizer.py --source ~/Downloads
+   ```
+
+### Building Your Own Executable (Optional)
+
+If you want to create a native executable for your platform:
+
+```bash
+# Install PyInstaller
+pip install pyinstaller
+
+# Build the executable
+pyinstaller --onefile --windowed gui.py
+```
+
+The executable will be created in the `dist/` folder.
+
 ## Architecture
 
 ```text
