@@ -27,7 +27,7 @@ A Python utility that automatically organizes files into categorized folders bas
 | **macOS**   | ✅ Available via GitHub Releases | ✅ Supported    |
 | **Linux**   | ✅ Available via GitHub Releases | ✅ Supported    |
 
-> **Note:** Pre-built executables for all platforms are automatically generated via GitHub Actions and attached to each [Release](https://github.com/pjames-tech/smart-file-organizer/releases).
+> **Note:** Pre-built executables for all platforms are automatically generated via GitHub Actions and attached to each [Release](https://github.com/pjames-tech/sfo-file-organizer/releases).
 
 ### macOS / Linux Setup
 
@@ -36,8 +36,8 @@ A Python utility that automatically organizes files into categorized folders bas
 2. **Clone and install dependencies:**
 
    ```bash
-   git clone https://github.com/pjames-tech/smart-file-organizer.git
-   cd smart-file-organizer
+   git clone https://github.com/pjames-tech/sfo-file-organizer.git
+   cd sfo-file-organizer
    pip install -r requirements.txt
    ```
 
@@ -70,7 +70,7 @@ The executable will be created in the `dist/` folder.
 ## Architecture
 
 ```text
-smart-file-organizer/
+sfo-file-organizer/
 ├── organizer.py        # Main CLI and orchestration
 ├── gui.py              # Desktop GUI application (tkinter)
 ├── app_config.py       # Configuration and file categories
@@ -99,24 +99,24 @@ pip install sfo-file-organizer
 Then run:
 
 ```bash
-smart-file-organizer      # Launch GUI
+sfo-file-organizer        # Launch GUI
 sfo                       # Shortcut for GUI
 sfo-cli --source ~/Downloads  # CLI mode
 ```
 
 ### Option 2: Download Pre-built Executable
 
-| Platform    | Download                                                                                                                                          |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Windows** | [Smart-File-Organizer-Windows.exe](https://github.com/pjames-tech/smart-file-organizer/releases/latest/download/Smart-File-Organizer-Windows.exe) |
-| **macOS**   | [Smart-File-Organizer-macOS.zip](https://github.com/pjames-tech/smart-file-organizer/releases/latest/download/Smart-File-Organizer-macOS.zip)     |
-| **Linux**   | [Smart-File-Organizer-Linux](https://github.com/pjames-tech/smart-file-organizer/releases/latest/download/Smart-File-Organizer-Linux)             |
+| Platform    | Download                                                                                                                                        |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Windows** | [Smart-File-Organizer-Windows.exe](https://github.com/pjames-tech/sfo-file-organizer/releases/latest/download/Smart-File-Organizer-Windows.exe) |
+| **macOS**   | [Smart-File-Organizer-macOS.zip](https://github.com/pjames-tech/sfo-file-organizer/releases/latest/download/Smart-File-Organizer-macOS.zip)     |
+| **Linux**   | [Smart-File-Organizer-Linux](https://github.com/pjames-tech/sfo-file-organizer/releases/latest/download/Smart-File-Organizer-Linux)             |
 
 ### Option 3: Run from Source
 
 ```bash
-git clone https://github.com/pjames-tech/smart-file-organizer.git
-cd smart-file-organizer
+git clone https://github.com/pjames-tech/sfo-file-organizer.git
+cd sfo-file-organizer
 pip install -r requirements.txt
 python gui.py
 ```

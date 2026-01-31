@@ -43,17 +43,17 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/pjames-tech/smart-file-organizer"
-Repository = "https://github.com/pjames-tech/smart-file-organizer"
-Issues = "https://github.com/pjames-tech/smart-file-organizer/issues"
+Homepage = "https://github.com/pjames-tech/sfo-file-organizer"
+Repository = "https://github.com/pjames-tech/sfo-file-organizer"
+Issues = "https://github.com/pjames-tech/sfo-file-organizer/issues"
 
 [project.scripts]
-smart-file-organizer = "gui:main"
+sfo-file-organizer = "gui:main"
 sfo = "gui:main"
 sfo-cli = "organizer:main"
 
 [project.gui-scripts]
-smart-file-organizer-gui = "gui:main"
+sfo-file-organizer-gui = "gui:main"
 
 [tool.setuptools]
 py-modules = ["gui", "organizer", "app_config", "history", "rules", "scheduler", "logging_config"]
