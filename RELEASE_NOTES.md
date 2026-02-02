@@ -1,3 +1,18 @@
+# Release Notes - v1.1.0
+
+## 🚀 Flatten Upgrade
+
+This release introduces a powerful upgrade to the "Flatten" feature, giving you more control over how you reset your folders.
+
+### ✨ New Features
+
+- **Enhanced Flatten Dialog**: Now offers two distinct modes:
+  - **Flatten Organized Only**: The classic, safe behavior. Only moves files from folders created by the app (marked with `.sfo_organized`).
+  - **Flatten EVERYTHING**: A new power-user option that flattens ALL subdirectories in the target folder, regardless of who created them. Great for fixing messy directory structures.
+- **Improved GUI**: Updated dialogs and tooltips for better usability.
+
+---
+
 # Release Notes - v1.0.0
 
 ## 🎉 Initial Release

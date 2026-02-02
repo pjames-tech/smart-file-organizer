@@ -61,9 +61,15 @@ class ToolTip:
 
     def showtip(self, event=None):
         x = y = 0
-        x, y, cx, cy = self.widget.bbox("insert")
-        x += self.widget.winfo_rootx() + 25
-        y += self.widget.winfo_rooty() + 20
+        try:
+            # Try to position near the mouse/insert cursor if possible
+            x, y, cx, cy = self.widget.bbox("insert")
+            x += self.widget.winfo_rootx() + 25
+            y += self.widget.winfo_rooty() + 20
+        except:
+             # Fallback to simple mouse/widget positioning
+             x = self.widget.winfo_rootx() + 20
+             y = self.widget.winfo_rooty() + self.widget.winfo_height() + 5
         self.tip_window = tw = tk.Toplevel(self.widget)
         tw.wm_overrideredirect(True)
         tw.wm_geometry("+%d+%d" % (x, y))
@@ -385,6 +391,94 @@ class ScrollableFrame(ttk.Frame):
                 self.canvas.yview_scroll(-1, "units")
             else:
                 self.canvas.yview_scroll(1, "units")
+
+
+
+class FlattenDialog(tk.Toplevel):
+    """
+    Custom modal dialog for Flatten options.
+    """
+    def __init__(self, parent, colors):
+        super().__init__(parent)
+        self.colors = colors
+        self.result = None
+        
+        self.title("Flatten Options")
+        self.geometry("450x400")
+        self.configure(bg=colors.BG_PRIMARY)
+        self.resizable(False, False)
+        
+        # Center on parent
+        self.transient(parent)
+        self.grab_set()
+        
+        self.create_widgets()
+        
+        # Calculate center position relative to parent
+        try:
+            x = parent.winfo_rootx() + (parent.winfo_width() // 2) - (450 // 2)
+            y = parent.winfo_rooty() + (parent.winfo_height() // 2) - (400 // 2)
+            self.geometry(f"+{x}+{y}")
+        except:
+            pass
+
+    def create_widgets(self):
+        # Header
+        header = tk.Frame(self, bg=self.colors.BG_PRIMARY, pady=20)
+        header.pack(fill=tk.X)
+        
+        tk.Label(header, text="⚠️ Folder Reset (Flatten)", 
+                 font=("Segoe UI", 16, "bold"),
+                 bg=self.colors.BG_PRIMARY, fg=self.colors.TEXT_PRIMARY).pack()
+                 
+        tk.Label(header, text="Choose how you want to flatten this folder.",
+                 font=("Segoe UI", 10),
+                 bg=self.colors.BG_PRIMARY, fg=self.colors.TEXT_SECONDARY).pack(pady=(5, 0))
+        
+        # Content
+        content = tk.Frame(self, bg=self.colors.BG_PRIMARY, padx=30, pady=10)
+        content.pack(fill=tk.BOTH, expand=True)
+        
+        # Standard Option
+        self.btn_standard = RoundedButton(
+            content, text="Flatten Organized Only", 
+            command=self.select_standard,
+            bg_color=self.colors.BG_PRIMARY, 
+            btn_color=self.colors.BG_TERTIARY,
+            btn_hover_color="#424242",
+            width=250, height=45
+        )
+        self.btn_standard.pack(pady=10)
+        
+        tk.Label(content, text="Only moves files from folders created by the organizer.\nKeeps other folders intact.",
+                 font=("Segoe UI", 8), justify=tk.CENTER,
+                 bg=self.colors.BG_PRIMARY, fg=self.colors.TEXT_SECONDARY).pack(pady=(0, 15))
+        
+        # Flatten All Option
+        self.btn_all = RoundedButton(
+            content, text="Flatten EVERYTHING", 
+            command=self.select_all,
+            bg_color=self.colors.BG_PRIMARY, 
+            btn_color="#C62828", # Red
+            btn_hover_color="#B71C1C",
+            width=250, height=45
+        )
+        self.btn_all.pack(pady=10)
+        
+        tk.Label(content, text="Moves files from ALL subfolders to the root.\nDeletes all empty subfolders.",
+                 font=("Segoe UI", 8), justify=tk.CENTER,
+                 bg=self.colors.BG_PRIMARY, fg=self.colors.TEXT_SECONDARY).pack()
+
+    def select_standard(self):
+        self.result = False # flatten_all = False
+        self.destroy()
+        
+    def select_all(self):
+        if messagebox.askyesno("Confirm Flatten ALL", 
+                               "WARNING: This will flatten ALL subdirectories.\n\n"
+                               "Are you sure you want to proceed?", parent=self):
+            self.result = True # flatten_all = True
+            self.destroy()
 
 
 class SFOFileOrganizerGUI:
@@ -1109,6 +1203,9 @@ class SFOFileOrganizerGUI:
         except Exception as e:
             self.message_queue.put(("error", str(e), None))
     
+
+
+
     def start_flatten(self):
         """Start the flatten (reset) process."""
         source = self.source_dir.get()
@@ -1117,16 +1214,18 @@ class SFOFileOrganizerGUI:
             messagebox.showerror("Error", f"Folder not found: {source}")
             return
             
-        if not messagebox.askyesno(
-            "Confirm Reset (Flatten)",
-            "Are you sure you want to flatten this folder?\n\n"
-            "This will move all files from subfolders back to the root and delete empty subfolders.\n\n"
-            "This action CAN be undone via 'Undo Last'."
-        ):
-            return
+        # Open custom dialog
+        dialog = FlattenDialog(self.root, self.colors)
+        self.root.wait_window(dialog)
+        
+        if dialog.result is None:
+            return # User closed/cancelled
+            
+        flatten_all = dialog.result
+        mode_text = "EVERYTHING" if flatten_all else "Organized Only"
         
         self.log(f"\n{'='*50}", "header")
-        self.log("Starting Folder Reset (Flatten)...", "header")
+        self.log(f"Starting Folder Reset ({mode_text})...", "header")
         self.log(f"Target: {source}", "info")
         
         self.set_running(True)
@@ -1135,15 +1234,15 @@ class SFOFileOrganizerGUI:
         # Run in thread
         thread = threading.Thread(
             target=self._run_flatten,
-            args=(source,),
+            args=(source, flatten_all),
             daemon=True
         )
         thread.start()
 
-    def _run_flatten(self, source):
+    def _run_flatten(self, source, flatten_all):
         """Run flatten in a separate thread."""
         try:
-            stats = flatten_directory(source)
+            stats = flatten_directory(source, flatten_all=flatten_all)
             self.message_queue.put(("flatten_complete", stats, None))
         except Exception as e:
             self.message_queue.put(("error", str(e), None))

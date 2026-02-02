@@ -274,11 +274,17 @@ def organize_files(
     return stats
 
 
-def flatten_directory(source_dir: str) -> dict:
+def flatten_directory(source_dir: str, flatten_all: bool = False) -> dict:
     """
-    Move all files from organizer-created subdirectories back to the source root.
-    Only flattens folders that contain the .sfo_organized marker file.
-    Records operations for Undo.
+    Move all files from subdirectories back to the source root.
+    
+    Args:
+        source_dir: The directory to flatten.
+        flatten_all: If True, flattens ALL subdirectories. 
+                     If False, only flattens folders created by the organizer (marked).
+    
+    Returns:
+        Statistics dictionary.
     """
     logger = get_logger()
     source = Path(source_dir)
@@ -288,28 +294,35 @@ def flatten_directory(source_dir: str) -> dict:
         logger.error(f"Invalid source directory: {source}")
         return stats
 
-    # Find all subdirectories that have the organizer marker (first level only)
-    tagged_dirs = [d for d in source.iterdir() 
-                   if d.is_dir() and (d / ORGANIZER_MARKER).exists()]
+    # select target directories
+    if flatten_all:
+        # Get ALL subdirectories (first level)
+        target_dirs = [d for d in source.iterdir() if d.is_dir()]
+        logger.info(f"Flattening ALL {len(target_dirs)} subdirectories.")
+    else:
+        # Get only tagged directories
+        target_dirs = [d for d in source.iterdir() 
+                       if d.is_dir() and (d / ORGANIZER_MARKER).exists()]
     
-    if not tagged_dirs:
-        logger.info("No organizer-created folders found to flatten.")
+    if not target_dirs:
+        logger.info("No folders found to flatten.")
         return stats
     
-    # Count pre-existing (untagged) directories for logging
-    all_subdirs = [d for d in source.iterdir() if d.is_dir()]
-    untagged_count = len(all_subdirs) - len(tagged_dirs)
-    if untagged_count > 0:
-        logger.info(f"Preserving {untagged_count} pre-existing folder(s).")
-        stats["skipped_dirs"] = untagged_count
+    # Count preserved directories (only relevant if not flattening all)
+    if not flatten_all:
+        all_subdirs = [d for d in source.iterdir() if d.is_dir()]
+        untagged_count = len(all_subdirs) - len(target_dirs)
+        if untagged_count > 0:
+            logger.info(f"Preserving {untagged_count} pre-existing folder(s).")
+            stats["skipped_dirs"] = untagged_count
 
     # Start session for Undo
     session = start_session(str(source), str(source), dry_run=False)
     
-    # Get files only from tagged directories (recursive within those dirs)
+    # Get files only from target directories (recursive within those dirs)
     files = []
-    for tagged_dir in tagged_dirs:
-        files.extend([p for p in tagged_dir.rglob("*") 
+    for target_dir in target_dirs:
+        files.extend([p for p in target_dir.rglob("*") 
                       if p.is_file() and p.name != ORGANIZER_MARKER])
     
     for file_path in files:
@@ -338,18 +351,18 @@ def flatten_directory(source_dir: str) -> dict:
             logger.error(f"Error moving {file_path}: {e}")
             stats["errors"] += 1
     
-    # Remove tagged directories (including marker files) - bottom-up
-    for tagged_dir in tagged_dirs:
+    # Remove target directories (including marker files) - bottom-up
+    for target_dir in target_dirs:
         # First remove the marker file
-        marker_path = tagged_dir / ORGANIZER_MARKER
+        marker_path = target_dir / ORGANIZER_MARKER
         try:
             if marker_path.exists():
                 marker_path.unlink()
         except Exception:
             pass
         
-        # Remove any empty subdirectories within the tagged dir (bottom-up)
-        for dir_path in sorted(tagged_dir.rglob("*"), key=lambda p: len(p.parts), reverse=True):
+        # Remove any empty subdirectories within the target dir (bottom-up)
+        for dir_path in sorted(target_dir.rglob("*"), key=lambda p: len(p.parts), reverse=True):
             if dir_path.is_dir():
                 try:
                     if not any(dir_path.iterdir()):
@@ -359,14 +372,14 @@ def flatten_directory(source_dir: str) -> dict:
                 except Exception:
                     pass
         
-        # Finally remove the tagged directory itself if empty
+        # Finally remove the target directory itself if empty
         try:
-            if not any(tagged_dir.iterdir()):
-                tagged_dir.rmdir()
+            if not any(target_dir.iterdir()):
+                target_dir.rmdir()
                 stats["removed_dirs"] += 1
-                logger.info(f"Removed organizer dir: {tagged_dir.name}")
+                logger.info(f"Removed dir: {target_dir.name}")
         except Exception as e:
-            logger.warning(f"Could not remove {tagged_dir.name}: {e}")
+            logger.warning(f"Could not remove {target_dir.name}: {e}")
     
     # Save the session
     save_session(session)
